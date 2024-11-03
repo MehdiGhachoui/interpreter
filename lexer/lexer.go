@@ -3,6 +3,7 @@ package lexer
 import "go-interpreter/token"
 
 // The way to turn the source code into tokens
+// Lexer is not suppose to tell us if the code works or contains error
 // our lexer only support ASCII characters
 
 type Lexer struct {
@@ -30,6 +31,15 @@ func (l *Lexer) readChar() {
 	l.readPosition += 1
 }
 
+// check next character without incrementing
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
+}
+
 func (l *Lexer) NextToken() token.Token {
 	var tk token.Token
 
@@ -37,7 +47,13 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
-		tk = newToken(token.ASSIGN, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tk = token.Token{Type: token.EQ, Literal: string(ch) + string(l.ch)}
+		} else {
+			tk = newToken(token.ASSIGN, l.ch)
+		}
 	case ';':
 		tk = newToken(token.SEMICOLON, l.ch)
 	case '(':
@@ -48,10 +64,28 @@ func (l *Lexer) NextToken() token.Token {
 		tk = newToken(token.COMMA, l.ch)
 	case '+':
 		tk = newToken(token.PLUS, l.ch)
+	case '-':
+		tk = newToken(token.MINUS, l.ch)
 	case '{':
 		tk = newToken(token.LBRACE, l.ch)
 	case '}':
 		tk = newToken(token.RBRACE, l.ch)
+	case '!':
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tk = token.Token{Type: token.NOT_EQ, Literal: string(ch) + string(l.ch)}
+		} else {
+			tk = newToken(token.BANG, l.ch)
+		}
+	case '*':
+		tk = newToken(token.ASTERISK, l.ch)
+	case '/':
+		tk = newToken(token.SLASH, l.ch)
+	case '<':
+		tk = newToken(token.LT, l.ch)
+	case '>':
+		tk = newToken(token.GT, l.ch)
 	case 0:
 		tk.Literal = ""
 		tk.Type = token.EOF
