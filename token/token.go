@@ -1,7 +1,12 @@
 package token
 
 // Tokens are representation of our source code
+type Token struct {
+	Type    TokenType
+	Literal string // holds the value of the token
+}
 
+// ENUM:
 type TokenType string
 
 const (
@@ -44,11 +49,6 @@ const (
 	ELSE     = "else"
 	RETURN   = "return"
 )
-
-type Token struct {
-	Type    TokenType
-	Literal string // holds the value of the token
-}
 
 var keywords = map[string]TokenType{
 	"fn":     FUNCTION,
