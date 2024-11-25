@@ -47,6 +47,6 @@ type Identifier struct {
 }
 
 func (i *Identifier) ExpressionNode()
-func (ls *Identifier) TokenLiteral() string {
-	return ls.Token.Literal
+func (i *Identifier) TokenLiteral() string {
+	return i.Token.Literal
 }
