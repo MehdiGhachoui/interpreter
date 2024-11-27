@@ -46,7 +46,10 @@ func testLetStatement(t *testing.T, stmt ast.Statement, name string) bool {
 		return false
 	}
 
-	letStmt, ok := stmt.(*ast.LetStatement) //golang type assertion make sure stmt is of type *ast.LetStatment
+	//golang type assertion :
+	//asserts that the interface value stmt holds the concrete type (...) and assigns the underlying (...) value
+	//to the variable 'letStmt'.
+	letStmt, ok := stmt.(*ast.LetStatement)
 	if !ok {
 		t.Errorf("statement is not *ast.LetStatement. got=%T", stmt)
 		return false
