@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func testLetStatements(t *testing.T) {
+func TestLetStatements(t *testing.T) {
 	input := `
 		let x = 5;
 		let y = 10;
@@ -17,6 +17,8 @@ func testLetStatements(t *testing.T) {
 	parser := New(lexer)
 
 	program := parser.ParseProgram()
+	checkParserError(t, parser)
+
 	if program == nil {
 		t.Fatalf("Parse Program -- returned NIL")
 	}
@@ -67,4 +69,18 @@ func testLetStatement(t *testing.T, stmt ast.Statement, name string) bool {
 	}
 
 	return true
+}
+
+func checkParserError(t *testing.T, p *Parser) {
+	errors := p.Errors()
+
+	if len(errors) == 0 {
+		return
+	}
+
+	t.Errorf("Parser has %d errors", len(errors))
+	for _, msg := range errors {
+		t.Errorf("Parser error: %q", msg)
+	}
+	t.FailNow()
 }
