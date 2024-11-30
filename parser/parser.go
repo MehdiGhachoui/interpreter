@@ -37,6 +37,9 @@ func (p *Parser) nextToken() {
 // Iterate over every token until we hit EOF
 func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
+
+	//Creating an empty slice of **Interface Types;
+	//**Implement the interface <Statement> methods
 	program.Statements = []ast.Statement{}
 
 	for p.currentToken.Type != token.EOF {
@@ -50,11 +53,12 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 // Return the type of the statement we are checking
-// by value, why ??
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.currentToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
+	case token.RETURN:
+		return p.parseReturnStatement()
 	default:
 		return nil
 	}
@@ -82,10 +86,27 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		return nil
 	}
 
-	//TODO: skiping the <expression> for now
+	//TODO: handle<expression>/Value
+	//....
+	p.nextToken()
 
-	if !p.currentTokenIs(token.SEMICOLON) {
-		p.nextToken()
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	stmt := &ast.ReturnStatement{
+		Token: p.currentToken,
+	}
+
+	//TODO: Handle <expression>/Value
+	p.nextToken()
+
+	if !p.expectPeek(token.SEMICOLON) {
+		return nil
 	}
 
 	return stmt
