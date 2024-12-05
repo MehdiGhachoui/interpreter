@@ -7,6 +7,17 @@ import (
 	"go-interpreter/token"
 )
 
+const (
+	_ int = iota // 0
+	LOWEST
+	EQUALS
+	LESSGRATER // < or >
+	SUM
+	PRODUCT
+	PREFIX //-x or !x
+	CALL   //func(x)
+)
+
 type (
 	prefixParseFn func() ast.Expression
 	infixParseFn  func(ast.Expression) ast.Expression
@@ -38,7 +49,19 @@ func New(l *lexer.Lexer) *Parser {
 	p.nextToken()
 	p.nextToken()
 
+	p.prefixParseFn = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	return p
+}
+
+// checking that the return type  implements the interface function
+// it's still a pointer just making sure it implements the interface
+// it's an interface as long a it implements it's functions regardless of the actual type
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{
+		Token: p.currentToken,
+		Value: p.currentToken.Literal,
+	}
 }
 
 func (p *Parser) nextToken() {
@@ -73,7 +96,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
@@ -123,6 +146,31 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	}
 
 	return stmt
+}
+
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+	stmt := &ast.ExpressionStatement{
+		Token: p.currentToken,
+	}
+
+	stmt.Expression = p.parseExpression(LOWEST)
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseExpression(precendece int) ast.Expression {
+	//check whether we have a parsing function associated with currentToken TYPE
+	prefix := p.prefixParseFn[p.currentToken.Type]
+	if prefix == nil {
+		return nil
+	}
+	leftExp := prefix()
+
+	return leftExp
 }
 
 func (p *Parser) currentTokenIs(t token.TokenType) bool {
